@@ -21,7 +21,7 @@ $appPath = (new App())->getAppPath();
 $addons_path = dirname($appPath) . DIRECTORY_SEPARATOR . 'addons' . DIRECTORY_SEPARATOR;
 Env::set('addons_path', $addons_path);
 // 定义路由
-// Route::any('addons/:addon/:control/:action', "\\think\\addons\\Route@execute");
+Route::any('addons/:addon/:control/:action', "\\think\\addons\\Route@execute");
 
 // 如果插件目录不存在则创建
 if (!is_dir($addons_path)) {
