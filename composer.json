@@ -1,0 +1,20 @@
+{
+    "name": "qilecms/qilecms-addons",
+    "description": "The ThinkPHP5.1 Addons Package",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "qilecms",
+            "email": "qilecms@qq.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "think\\": "src/"
+        },
+        "files": [
+            "src/helper.php"
+        ]
+    }
+}
