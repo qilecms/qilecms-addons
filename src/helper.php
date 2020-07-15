@@ -1,14 +1,13 @@
 <?php
 // +----------------------------------------------------------------------
-// | thinkphp5 Addons [ WE CAN DO IT JUST THINK IT ]
+// | thinkphp5.1 Addons [ WE CAN DO IT JUST THINK IT ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2016 http://www.qilecms.com All rights reserved.
+// | Copyright (c) 2019 http://www.qilecms.com All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: 奇乐CMS
+// | Author:奇乐CMS
 // +----------------------------------------------------------------------
-
 use think\App;
 use think\facade\Hook;
 use think\facade\Config;
@@ -41,24 +40,27 @@ Hook::add('app_init', function () {
         return;
     }
     // 当debug时不缓存配置
-    $config = config('app_debug') ? [] : (array)cache('addons');
+    $config = config('app_debug') ? [] :cache('addons');
+
+
     if (empty($config)) {
         // 读取插件目录及钩子列表
         $base = get_class_methods("\\think\\Addons");
-       ;
         // 读取插件目录中的php文件
         foreach (glob(Env::get('addons_path') . '*/*.php') as $addons_file) {
-           
             // 格式化路径信息
             $info = pathinfo($addons_file);
             // 获取插件目录名
             $name = pathinfo($info['dirname'], PATHINFO_FILENAME);
             // 找到插件入口文件
-            if (strtolower($info['filename']) == strtolower($name)) {
+            if (strtolower($info['filename']) == strtolower(Loader::parseName($name,1))) {
+         
                 // 读取出所有公共方法
                 $methods = (array)get_class_methods("\\addons\\" . $name . "\\" . $info['filename']);
+    
                 // 跟插件基类方法做比对，得到差异结果
                 $hooks = array_diff($methods, $base);
+                
                 // 循环将钩子方法写入配置中
                 foreach ($hooks as $hook) {
                     if (!isset($config['hooks'][$hook])) {
@@ -74,7 +76,8 @@ Hook::add('app_init', function () {
                 }
             }
         }
-        cache('addons', $config);
+
+       cache('addons', $config);
     }
     config('addons', $config);
 });
@@ -110,6 +113,7 @@ Hook::add('action_begin', function () {
  */
 function hook($hook, $params = [])
 {
+    $hook = lcfirst(Loader::parseName($hook,1));
     Hook::listen($hook, $params);
 }
 
@@ -122,8 +126,7 @@ function hook($hook, $params = [])
  */
 function get_addon_class($name, $type = 'hook', $class = null)
 {
-  $name = Loader::parseName($name);
-  
+    $name = Loader::parseName($name);  //驼峰转下划线
     // 处理多级控制器情况
     if (!is_null($class) && strpos($class, '.')) {
         $class = explode('.', $class);
@@ -132,7 +135,8 @@ function get_addon_class($name, $type = 'hook', $class = null)
         }
         $class = implode('\\', $class);
     } else {
-        $class = Loader::parseName(is_null($class) ? $name : $class, 1);
+      
+        $class = Loader::parseName(is_null($class) ? $name : $class, 1); 
     }
     switch ($type) {
         case 'controller':
@@ -141,7 +145,7 @@ function get_addon_class($name, $type = 'hook', $class = null)
         default:
             $namespace = "\\addons\\" . $name . "\\" . $class;
     }
-
+  
     return class_exists($namespace) ? $namespace : '';
 }
 
@@ -152,7 +156,7 @@ function get_addon_class($name, $type = 'hook', $class = null)
  */
 function get_addon_config($name)
 {
-    $class = get_addon_class($name);
+   $class = get_addon_class($name);
     if (class_exists($class)) {
         $addon = new $class();
         return $addon->getConfig();
@@ -163,29 +167,28 @@ function get_addon_config($name)
 
 /**
  * 插件显示内容里生成访问插件的url
- * @param $url
- * @param array $param
+ * @param string $url 地址 格式：插件名/控制器/方法
+ * @param array $param ,参数
  * @return bool|string
  * @param bool|string $suffix 生成的URL后缀
  * @param bool|string $domain 域名
  */
 function addon_url($url, $param = [], $suffix = true, $domain = false)
 {
-    $url = parse_url($url);
-    
-    $case = config('url_convert');
-    $addons = $case ? Loader::parseName($url['scheme']) : $url['scheme'];
-    $controller = $case ? Loader::parseName($url['host']) : $url['host'];
-    $action = trim($case ? strtolower($url['path']) : $url['path'], '/');
+     $parse_param = parse_url(ltrim($url, '/'));
+      $url_array = explode('/',$parse_param['path']);
+      $addons = $url_array[0];  //插件名
+      $controller = $url_array[1];  //控制器
+      $action = $url_array[2];  //方法
 
     /* 解析URL带的参数 */
-    if (isset($url['query'])) {
-        parse_str($url['query'], $query);
+    if (isset($parse_param['query'])) {
+        parse_str($parse_param['query'], $query);
+
         $param = array_merge($query, $param);
     }
-
     // 生成插件链接新规则
-    $actions = "{$addons}/{$controller}/{$action}";
+      $actions = "{$addons}/{$controller}/{$action}";
 
-    return url("/addons/{$actions}",$param, $suffix, $domain);
+    return url("@addons/{$actions}",$param, $suffix, $domain);
 }

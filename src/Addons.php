@@ -1,16 +1,15 @@
 <?php
 // +----------------------------------------------------------------------
-// | thinkphp5 Addons [ WE CAN DO IT JUST THINK IT ]
+// | thinkphp5.1 Addons [ WE CAN DO IT JUST THINK IT ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2016 http://www.qilecms.com All rights reserved.
+// | Copyright (c) 2019 http://www.qilecms.com All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: 奇乐CMS
+// | Author:奇乐CMS
 // +----------------------------------------------------------------------
 namespace think;
 use think\Loader;
-
 /**
  * 插件基类
  * Class Addns
@@ -88,7 +87,7 @@ abstract class Addons
     }
 
     /**
-     * 获取插件的配置数组
+     * 获取插件的默认配置信息
      * @param string $name 可选模块名
      * @return array|mixed|null
      */
@@ -102,10 +101,8 @@ abstract class Addons
         if (isset($_config[$name])) {
             return $_config[$name];
         }
-  
-        $map['name'] = $name;
-        $map['status'] = 1;
         $config = [];
+
         if (is_file($this->config_file)) {
             $temp_arr = include $this->config_file;
             foreach ($temp_arr as $key => $value) {
@@ -122,7 +119,6 @@ abstract class Addons
             unset($temp_arr);
         }
         $_config[$name] = $config;
-
         return $config;
     }
 
