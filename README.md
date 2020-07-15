@@ -17,7 +17,7 @@
     'hooks' => [
 	    // 可以定义多个钩子
         'testhook'=>'test' // 键为钩子名称，用于在业务中自定义钩子处理，值为实现该钩子的插件，
-					// 多个插件可以用数组也可以用逗号分割
+		 // 多个插件可以用数组也可以用逗号分割
 	]
 ]
 ```
@@ -90,10 +90,10 @@ class Test extends Addons	// 需继承think\addons\Addons类
     }
 
     /**
-     * 实现的testhook钩子方法
+     * 实现的testHook钩子方法
      * @return mixed
      */
-    public function testhook($param)
+    public function testHook($param)
     {
 		// 调用钩子时候的参数信息
         print_r($param);
@@ -133,9 +133,11 @@ return [
 如果插件中需要有链接或提交数据的业务，可以在插件中创建controller业务文件，
 要访问插件中的controller时使用addon_url生成url链接。
 如下：
-<a href="{:addon_url('test://Action/link')}">link test</a>
+
+<a href="{:addon_url('test/action/method')}"> test</a>
+
 格式为：
-test为插件名，Action为controller中的类名，link为controller中的方法
+test为插件名，ation为controller中的类名，method为controller中的方法
 ```
 
 ### 创建插件的controller文件
@@ -179,14 +181,14 @@ class Action extends Controller
 ### 模板中使用钩子
 
 ```
-<div>{:hook('testhook', ['id'=>1])}</div>
+<div>{:hook('test_hook', ['id'=>1])}</div>
 ```
 
 ### php业务中使用
 > 只要是thinkphp5正常流程中的任意位置均可以使用
 
 ```
-hook('testhook', ['id'=>1])
+hook('test_hook', ['id'=>1])
 ```
 
 ## 插件目录结构
