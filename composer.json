@@ -8,6 +8,9 @@
             "email": "qilecms@qq.com"
         }
     ],
+     "require": {
+        "topthink/framework": "5.1.*"
+    },
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
