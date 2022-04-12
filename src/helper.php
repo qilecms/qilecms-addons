@@ -30,20 +30,23 @@ if (!is_dir($addons_path)) {
 // 注册类的根命名空间
 Loader::addNamespace('addons', $addons_path);
 
+
 // 闭包自动识别插件目录配置
 Hook::add('app_init', function () {
+
     // 获取开关
     $autoload = (bool)Config::get('addons.autoload', false);
-    
+
     // 非正是返回
     if (!$autoload) {
         return;
     }
+
     // 当debug时不缓存配置
     $config = config('app_debug') ? [] :cache('addons');
 
-
     if (empty($config)) {
+       
         // 读取插件目录及钩子列表
         $base = get_class_methods("\\think\\Addons");
         // 读取插件目录中的php文件
@@ -79,6 +82,8 @@ Hook::add('app_init', function () {
 
        cache('addons', $config);
     }
+
+
     config('addons', $config);
 });
 
@@ -113,8 +118,19 @@ Hook::add('action_begin', function () {
  */
 function hook($hook, $params = [])
 {
-    $hook = lcfirst(Loader::parseName($hook,1));
-    Hook::listen($hook, $params);
+   $hook = lcfirst(Loader::parseName($hook,1));
+   $result = Hook::listen($hook, $params);
+    if (is_array($result)) {
+        foreach ($result as &$item) {
+            if ($item instanceof \think\response\Json) {
+            $item = $item->getContent();
+            return  json_decode($item);
+            }
+        }
+     
+        $result = join(PHP_EOL, $result);
+    }
+   return $result;
 }
 
 /**
